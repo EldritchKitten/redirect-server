@@ -1,16 +1,41 @@
 use std::{
+    env,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
 };
 
+struct Args {
+    binding: String,
+}
+impl Args {
+    pub fn collect() -> Args {
+        let raw: Vec<String> = env::args().collect();
+        Args {
+            binding: Args::get_binding_from_raw_args(raw),
+        }
+    }
+
+    fn get_binding_from_raw_args(raw: Vec<String>) -> String {
+        for arg in raw {
+            if arg.starts_with("binding=") {
+                return arg[8..].to_string();
+            }
+        }
+        //return String::from("0.0.0.0:80"); TODO - Use this when ready.
+        return String::from("0.0.0.0:7878");
+    }
+}
+
 fn main() {
     println!("Initializing...");
-    let binding = "0.0.0.0:7878";
-    let listener = TcpListener::bind(binding)
-        .expect("Failed to bind TCP listener");
-    let mut request_counter: u64 = 0;
-    println!("Bound to {}", binding);
 
+    let args = Args::collect();
+
+    let listener = TcpListener::bind(&args.binding)
+        .expect("Failed to bind TCP listener");
+    println!("Bound to {}", &args.binding);
+
+    let mut request_counter: u64 = 0;
     for incoming_request in listener.incoming() {
         request_counter += 1;
         println!("=== Request {request_counter} Start ===");
