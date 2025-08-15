@@ -38,12 +38,12 @@ fn main() {
     let mut request_counter: u64 = 0;
     for incoming_request in listener.incoming() {
         request_counter += 1;
-        println!("=== Request {request_counter} Start ===");
+        println!("=== Request {request_counter} ===");
         match incoming_request {
             Ok(stream) => handle_connection(stream),
             Err(err) => println!("Error: {}", err),
         }
-        println!("=== Request {request_counter} End ===");
+        println!("================");
     }
 }
 
@@ -55,9 +55,15 @@ fn handle_connection(mut stream: TcpStream) {
         .take_while(|line| !line.is_empty())
         .collect();
     
-    println!("Request: {http_request:#?}");
+    //println!("Request: {http_request:#?}");
+    for line in http_request {
+        println!("{}", line);
+    }
 
     let response = response_redirect();
+
+    println!("=== Response ===");
+    println!("{}", &response);
 
     stream.write_all(response.as_bytes()).unwrap();
 }
