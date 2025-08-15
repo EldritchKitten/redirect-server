@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, env, io::{prelude::*, BufReader}, net::{TcpListener, TcpStream}
+    collections::HashMap, env, fs, io::{prelude::*, BufReader}, net::{TcpListener, TcpStream},
 };
 
 struct Args {
@@ -24,16 +24,41 @@ impl Args {
     }
 }
 
-struct Redirects(HashMap<String, String>);
+struct Redirects(HashMap<&'static str, &'static str>);
 impl Redirects {
     pub fn collect() -> Redirects {
-        let mut map = HashMap::new();
-        map.insert("collectio.nz".to_string(), "http://localhost:8000".to_string());
-        Redirects(map)
+        Redirects(
+            Redirects::construct_map_from_raw(
+                Redirects::read_raw_from_file().leak()
+            )
+        )
     }
 
     pub fn get(&self, host: &str) -> Option<&str> {
-        self.0.get(host).map(String::as_str)
+        self.0.get(host).map(|s| *s)
+    }
+
+    fn read_raw_from_file() -> String {
+        let home_dir = env::var("HOME")
+            .expect("Should be able to find the home directory");
+        let file_path = format!("{home_dir}/.host_redirects");
+
+        // Create an empty file if it doesn't exist.
+        fs::OpenOptions::new().write(true).create(true).open(&file_path).unwrap();//TODO
+
+        return fs::read_to_string(file_path).unwrap();//TODO
+    }
+
+    fn construct_map_from_raw(raw: &str) -> HashMap<&str, &str> {
+        let mut map = HashMap::new();
+        for line in raw.lines() {
+            if let Some(index) = line.find(" -> ") {
+                let host = &line[0..index];
+                let redirect = &line[index+4..];
+                map.insert(host, redirect);
+            }
+        }
+        return map;
     }
 }
 
