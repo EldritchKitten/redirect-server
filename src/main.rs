@@ -5,20 +5,18 @@ use std::{
 
 fn main() {
     println!("Initializing...");
-    // 127.0.0.1:7878
-    // 192.168.1.148:7878
-    // 31.94.26.170
-    let listener = TcpListener::bind("0.0.0.0:7878")
+    let binding = "0.0.0.0:7878";
+    let listener = TcpListener::bind(binding)
         .expect("Failed to bind TCP listener");
     let mut request_counter: u64 = 0;
+    println!("Bound to {}", binding);
 
-    for stream in listener.incoming() {
+    for incoming_request in listener.incoming() {
         request_counter += 1;
         println!("=== Request {request_counter} Start ===");
-        //let stream = stream.unwrap();
-        if stream.is_ok() {
-            let stream = stream.unwrap();
-            handle_connection(stream);
+        match incoming_request {
+            Ok(stream) => handle_connection(stream),
+            Err(err) => println!("Error: {}", err),
         }
         println!("=== Request {request_counter} End ===");
     }
