@@ -34,6 +34,23 @@ fn handle_connection(mut stream: TcpStream) {
     
     println!("Request: {http_request:#?}");
 
+    let response = response_redirect();
+
+    stream.write_all(response.as_bytes()).unwrap();
+}
+
+fn response_redirect() -> String {
+    let location = "http://localhost:8000";
+
+    let location_header = format!("Location: {location}");
+    let headers = format!("{location_header}");
+
+    let status_line = "HTTP/1.1 301 Moved Permanently";
+
+    return format!("{status_line}\r\n{headers}");
+}
+
+fn response_possessed() -> String {
     let content = ":3";
     let length = content.len();
 
@@ -43,7 +60,6 @@ fn handle_connection(mut stream: TcpStream) {
 
     let status_line = "HTTP/1.1 200 OK";
 
-    let response = format!("{status_line}\r\n{headers}\r\n\r\n{content}");
-
-    stream.write_all(response.as_bytes()).unwrap();
+    return format!("{status_line}\r\n{headers}\r\n\r\n{content}");
 }
+
