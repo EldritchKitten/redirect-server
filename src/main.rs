@@ -55,7 +55,6 @@ fn handle_connection(mut stream: TcpStream) {
         .take_while(|line| !line.is_empty())
         .collect();
     
-    //println!("Request: {http_request:#?}");
     for line in http_request {
         println!("{}", line);
     }
@@ -74,7 +73,7 @@ fn response_redirect() -> String {
     let location_header = format!("Location: {location}");
     let headers = format!("{location_header}");
 
-    let status_line = "HTTP/1.1 301 Moved Permanently";
+    let status_line = "HTTP/1.1 308 Permanent Redirect";
 
     return format!("{status_line}\r\n{headers}");
 }
