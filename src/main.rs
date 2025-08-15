@@ -19,8 +19,7 @@ impl Args {
                 return arg[8..].to_string();
             }
         }
-        //return String::from("0.0.0.0:80"); TODO - Use this when ready.
-        return String::from("0.0.0.0:7878");
+        return String::from("0.0.0.0:80");
     }
 }
 
